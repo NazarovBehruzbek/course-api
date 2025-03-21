@@ -1,37 +1,7 @@
 const express = require("express");
 const Course = require("../models/Course");
-const multer = require("multer");
-const path = require("path");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Course:
- *       type: object
- *       required:
- *         - title
- *         - description
- *         - price
- *       properties:
- *         id:
- *           type: string
- *           description: Kurs ID-si
- *         title:
- *           type: string
- *           description: Kurs nomi
- *         description:
- *           type: string
- *           description: Kurs haqida ma'lumot
- *         price:
- *           type: number
- *           description: Kurs narxi
- *         image:
- *           type: string
- *           description: Kurs rasmi
- */
 
 /**
  * @swagger
@@ -48,7 +18,7 @@ router.get("/", async (req, res) => {
         const courses = await Course.find();
         res.json(courses);
     } catch (err) {
-        res.status(500).json({ message: "Serverda xatolik yuz berdi", err });
+        res.status(500).json({ message: "Serverda xatolik yuz berdi", error: err.message });
     }
 });
 
@@ -79,7 +49,7 @@ router.get("/:id", async (req, res) => {
         }
         res.json(course);
     } catch (err) {
-        res.status(500).json({ message: "Serverda xatolik yuz berdi", err });
+        res.status(500).json({ message: "Serverda xatolik yuz berdi", error: err.message });
     }
 });
 
@@ -89,6 +59,8 @@ router.get("/:id", async (req, res) => {
  *   post:
  *     summary: Yangi kurs yaratish
  *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -107,15 +79,11 @@ router.post("/", authMiddleware, async (req, res) => {
         if (!title || !description || !price) {
             return res.status(400).json({ message: "Hamma ma'lumotlar kiritilishi kerak" });
         }
-        const newCourse = new Course({
-            title,
-            description,
-            price,
-        });
+        const newCourse = new Course({ title, description, price });
         await newCourse.save();
         res.status(201).json(newCourse);
     } catch (err) {
-        res.status(500).json({ message: "Serverda xatolik yuz berdi", err });
+        res.status(500).json({ message: "Serverda xatolik yuz berdi", error: err.message });
     }
 });
 
@@ -125,6 +93,8 @@ router.post("/", authMiddleware, async (req, res) => {
  *   put:
  *     summary: Kursni yangilash
  *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -152,7 +122,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
         }
         res.json({ message: "Yangilandi", updatedCourse });
     } catch (err) {
-        res.status(500).json({ message: "Serverda xatolik yuz berdi", err });
+        res.status(500).json({ message: "Serverda xatolik yuz berdi", error: err.message });
     }
 });
 
@@ -162,6 +132,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
  *   delete:
  *     summary: Kursni o‘chirish
  *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -183,7 +155,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
         }
         res.json({ message: "Kurs o‘chirildi", deleteCourse });
     } catch (err) {
-        res.status(500).json({ message: "Serverda xatolik yuz berdi", err });
+        res.status(500).json({ message: "Serverda xatolik yuz berdi", error: err.message });
     }
 });
 

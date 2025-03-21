@@ -1,32 +1,8 @@
 const express = require("express");
-const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const router = express.Router();
 
-/**
- * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       required:
- *         - phone
- *         - password
- *       properties:
- *         id:
- *           type: string
- *           description: Foydalanuvchi ID-si
- *         phone:
- *           type: string
- *           description: Telefon raqami
- *         password:
- *           type: string
- *           description: Parol
- *         token:
- *           type: string
- *           description: JWT token
- */
+const router = express.Router();
 
 /**
  * @swagger
@@ -69,28 +45,36 @@ const router = express.Router();
  *         description: Server xatosi
  */
 
+// Test foydalanuvchi (parol hash qilingan)
 const TEST_USER = {
-    phone_number: "887666051",
-    password: "12345",
-  };
+  phone: "887666051",
+  password: bcrypt.hashSync("12345", 10), // Parolni hash qilish
+};
+
 router.post("/login", async (req, res) => {
-    try {
-        if (phone_number !== TEST_USER.phone_number || password !== TEST_USER.password) {
-            return res.status(400).json({ message: "Telefon raqam yoki parol noto‘g‘ri" });
-          }
-        // Parolni tekshirish
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Telefon raqam yoki parol noto‘g‘ri" });
-        }
+  try {
+    const { phone, password } = req.body; // Requestdan ma’lumotlarni olish
 
-        // Token yaratish
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-        res.json({ token });
-    } catch (err) {
-        res.status(500).json({ message: "Serverda xatolik yuz berdi", err });
+    // Telefon raqamni tekshirish
+    if (phone !== TEST_USER.phone) {
+      return res.status(400).json({ message: "Telefon raqam yoki parol noto‘g‘ri" });
     }
+
+    // Parolni tekshirish
+    const isMatch = await bcrypt.compare(password, TEST_USER.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Telefon raqam yoki parol noto‘g‘ri" });
+    }
+
+    // Token yaratish
+    const token = jwt.sign({ phone: TEST_USER.phone }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ message: "Serverda xatolik yuz berdi", error: err.message });
+  }
 });
 
 module.exports = router;
