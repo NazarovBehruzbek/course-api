@@ -43,7 +43,7 @@ const authMiddleware = require("../middleware/authMiddleware");
  *       200:
  *         description: Kurslar ro‘yxati
  */
-router.get("/", authMiddleware, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const courses = await Course.find();
         res.json(courses);
@@ -71,7 +71,7 @@ router.get("/", authMiddleware, async (req, res) => {
  *       404:
  *         description: Kurs topilmadi
  */
-router.get("/:id", authMiddleware, async (req, res) => {
+router.get("/:id", async (req, res) => {
     try {
         const course = await Course.findById(req.params.id);
         if (!course) {
